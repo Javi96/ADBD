@@ -39,7 +39,7 @@ having count(*) = (select count(*) from parts where price < 20)
 
 
 -- EJ 6 ok
--- Nombres de empleados y sus totales de ventas en el año 1995.
+-- Nombres de empleados y sus totales de ventas en el aÃ±o 1995.
 select eno, ename , sum(qty*price) as total_ventas
 from employees natural join orders natural join odetails natural join parts
 where shipped >= '01/01/1995' and received <= '12/12/1995'
@@ -48,7 +48,7 @@ group by eno, ename
 
 
 -- EJ 7 ok
--- Nombres y números de los empleados que nunca han vendido a un cliente de su código postal
+-- Nombres y nÃºmeros de los empleados que nunca han vendido a un cliente de su cÃ³digo postal
 select eno, ename
 from employees 
 where employees.zip not in (
@@ -94,7 +94,7 @@ order by count(*) desc
 
 
 -- EJ 12 -- ok
--- Tiempo medio en número de días desde el envío de los pedidos hasta su recepción
+-- Tiempo medio en nÃºmero de dÃ­as desde el envÃ­o de los pedidos hasta su recepciÃ³n
 --/*
 select * from orders;
 select avg(to_date(shipped, 'DD/MM/YYYY') - to_date(received, 'DD/MM/YYYY')) as espera_time
@@ -132,7 +132,7 @@ where shipped is null;
 
 
 -- EJ 16 ok
--- disminuye 10 euros el precio de las piezas cuyo coste está por encima de la media
+-- disminuye 10 euros el precio de las piezas cuyo coste estÃ¡ por encima de la media
 
 --/* 
 select * from parts;
@@ -198,21 +198,31 @@ having term not like 'f96'
 select sid
 from (catalog natural join courses) join (students natural join enrolls) using (term, lineno)
 --group by sid
-group by sid, cno
+group by sid
 having cno = all ('csc226', 'csc227')
 ;
 
 -- 3) Identificador (sid) de los estudiantes que se han matriculado en todas las asignaturas.
 select sid
 from (cataloge natural join courses) join (students natural join enrolls) using (term, lineno)
-group by sid, cno
+group by sid
 having cno = all(
     select distinct cno
     from cataloge
 )
 ; 
 
--- 4) Nombre de los estudiantes que se han matriculado en más asignaturas.
+-- 4) Nombre de los estudiantes que se han matriculado en mÃ¡s asignaturas.
+select fname
+from students natural join enrolls natural join courses natural join cataloge
+group by sid, fname, lname
+having count(*) = (
+    select max(count(*))
+    from students natural join enrolls natural join courses natural join cataloge
+    group by sid, cno
+)
+;
+               
 -- 5) Nombre de los estudiantes que se han matriculado en menos asignaturas.
 select fname, lname, count(*)
 from students natural join enrolls natural join courses natural join cataloge
@@ -225,20 +235,21 @@ having count(*) = (
 ;
 
 -- 6) Nombre de los estudiantes que NO se han matriculado en ninguna asignatura.
+select fname
+from students natural join enrolls natural join courses natural join cataloge
+group by sid, fname, lname
+having count(*) = 0
+;
+
 -- 7) Asignaturas en las que se han matriculado 5 estudiantes o menos.
 select distinct ctitle
 from students natural join enrolls natural join courses natural join cataloge
 group by cno, sid, ctitle
 having count(*)<=5
 ;
--- 8) Mostrar el cuatrimestre, nombre de curso, línea y número junto con el número de matriculados.
 
-
-
-
-
-
-
-
-
-
+-- 8) Mostrar el cuatrimestre, nombre de curso, lÃ­nea y nÃºmero junto con el nÃºmero de matriculados.
+select term, ctitle, line, count(sid)
+from students natural join enrolls natural join courses natural join cataloge
+group by cno, term, ctitle, line
+;
