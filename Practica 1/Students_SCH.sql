@@ -1,5 +1,5 @@
-drop table catalog cascade constraints;
-create table catalog (
+drop table cataloge cascade constraints;
+create table cataloge (
   cno       varchar2(7) not null,
   ctitle    varchar2(50),
   primary key (cno));
@@ -22,7 +22,7 @@ create table courses (
   c         number(2) check(c > 0),
   d         number(2) check(d > 0),
   primary key (term,lineno),
-  foreign key (cno) references catalog);
+  foreign key (cno) references cataloge);
 
 drop table components cascade constraints;
 create table components (

@@ -1,14 +1,14 @@
-insert into catalog values
+insert into cataloge values
   ('csc226','Introduction to Programming I');
-insert into catalog values
+insert into cataloge values
   ('csc227','Introduction to Programming II');
-insert into catalog values
+insert into cataloge values
   ('csc343','Assembly Programming');
-insert into catalog values
+insert into cataloge values
   ('csc481','Automata and Formal Languages');
-insert into catalog values
+insert into cataloge values
   ('csc498','Introduction to Database Systems');
-insert into catalog values
+insert into cataloge values
   ('csc880','Deductive Databases and Logic Programming');
 
 insert into students values
