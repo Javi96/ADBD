@@ -1,20 +1,41 @@
 -------------------------------------- punto 1 --------------------------------------				--
+drop table Empleados cascade constraints;
 CREATE TABLE Empleados( 
 	DNI CHAR(9) PRIMARY KEY, 
 	Nombre VARCHAR(100),
 	CodDept CHAR(5) REFERENCES Departamentos on delete set NULL,
 	Salario NUMBER(4,0));
 
+drop table Departamentos cascade constraints;
 CREATE TABLE Departamentos(
 	CodDept CHAR(5) PRIMARY KEY, 
 	Nombre VARCHAR(100));
 
+drop table Cambios cascade constraints;
 CREATE TABLE Cambios(
 	IdCambio VARCHAR(10) PRIMARY KEY, 
 	Usuario VARCHAR(12), 
 	SalarioAnt NUMBER(4,0),
 	SalarioNew NUMBER(4,0));
+        
+insert into Empleados values('12345679A', 'Lucas', '11111', 1300);
+insert into Empleados values('12345679B', 'Juan', '22222', 1500);
+insert into Empleados values('12345679C', 'Marta', '22222', 2000);
+insert into Empleados values('12345679D', 'Dani', '11111', 1900);
+insert into Empleados values('12345679E', 'Rocio', '22222', 1800);
+insert into Empleados values('12345679F', 'Sara', '33333', 1200);
+insert into Empleados values('12345679G', 'Sonia', '33333', 1300);
+insert into Empleados values('12345679H', 'Pablo', '11111', 1000);
 
+
+
+insert into Departamentos values('11111', 'Departamento1');
+insert into Departamentos values('22222', 'Departamento2');
+insert into Departamentos values('33333', 'Departamento3');
+
+
+
+commit;
 -------------------------------------- punto 2 --------------------------------------				--
 
 Create table Aeropuerto(
