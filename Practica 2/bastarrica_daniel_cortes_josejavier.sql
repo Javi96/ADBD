@@ -73,14 +73,41 @@ group by e.CodDept;
 
 
 
--- EJERCICIO 2
+----------------------------------------------------- EJERCICIO 2 -----------------------------------------------------
 -- Apartado a)
+/*
+Escribir un procedimiento almacenado que reciba como argumentos una fecha, los códigos de un aeropuerto de origen 
+y uno de destino y un pasaporte y registre un billete en el primer vuelo en el que haya plazas libres. En caso de
+ que no haya vuelos disponibles se informará mediante un mensaje.
+*/
 
 -- Apartado b)
+/*
+Implementar un trigger que registre en la tabla Ventas el número total de billetes vendidos y el importe total de 
+las ventas para cada vuelo. En el caso de devolución de un billete tan solo se reintegrará un importe fijo de 150€, 
+no el importe total del billete.
+*/
+
 create or replace trigger TotalBill
-
+after insert or delete
+on table Billetes
+declare
+	Dinero 	number(6,2);
 begin
-
+	if inserting then
+		Dinero := (
+			select Importe 
+			from Vuelo natural join Billetes 
+			where Numero = :new.Numero and Fecha like :new.Fecha)
+		update Ventas
+		set Ventas.Importe += Dinero, Ventas.Vendidos += 1
+		where :new.Numero = Ventas.Numero and :new.Fecha like Ventas.Fecha;
+	end if;
+	if deleting then
+		update Ventas
+		set Ventas.Importe -= 150, Ventas.Vendidos -= 1
+		where :new.Numero = Ventas.Numero and :new.Fecha like Ventas.Fecha;
+	end if;
 end;
 
 
