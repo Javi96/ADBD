@@ -35,9 +35,8 @@ salario de cada empleado cuyo salario sea inferior a la media del departamento.
 Incluir el total de dichos salarios por departamento.
 */
 
-create or replace procedure listaEmpDepart 
+create or replace NONEDITIONABLE procedure listaEmpDepart 
 is
--- declare
 Cursor CursorSalarios IS 
     Select Empleados.Nombre as empNom, Salario, Departamentos.Nombre as depNom
     from Empleados join Departamentos on Empleados.CodDept = Departamentos.CodDept
@@ -49,37 +48,41 @@ Cursor CursorSalarios IS
     	-- group by CodDept
     	)
     order by Departamentos.Nombre;
-    
+
     totalDep Empleados.Salario%type := 0;
     lastDep Departamentos.Nombre%type := '';
+    
+    emp_nom Empleados.Nombre%type := '';
+    dep_nom Departamentos.Nombre%type := '';
+    emp_sal Empleados.Salario%type := 0;
+    
+    total_dep Empleados.Salario%type := 0;
+    last_dep Departamentos.Nombre%type;
 
 begin
-
-    DBMS_OUTPUT.PUT_LINE ('Emp, Sal, Dept');
-    for regSal in CursorSalarios loop
-         DBMS_OUTPUT.PUT_LINE (lastDep);
-        if lastDep = '' then
-            totalDep := 0;
-            lastDep := regSal.depNom;
-        end if;
     
-        if lastDep = regSal.depNom then
-            totalDep := totalDep + regSal.Salario;
+    for pointer in CursorSalarios loop
+        emp_nom := pointer.empNom;
+        dep_nom := pointer.depNom;
+        emp_sal := pointer.Salario;
+        
+        if last_dep is null or last_dep = dep_nom then -- son del mismo departamento o es el primero de todos -> se acumula
+            DBMS_OUTPUT.PUT_LINE(emp_nom || ' --- ' || dep_nom || ' --- ' || emp_sal);
+            total_dep := total_dep + emp_sal;
         else
-            DBMS_OUTPUT.PUT_LINE ( 'Total ' || lastDep || ': ' || totalDep );
-            totalDep := regSal.Salario;
-            lastDep := regSal.depNom;
+            DBMS_OUTPUT.PUT_LINE('TOTAL ' || last_dep || ' --- ' || total_dep);
+            DBMS_OUTPUT.PUT_LINE(emp_nom || ' --- ' || dep_nom || ' --- ' || emp_sal);
+            total_dep := emp_sal;
+        
         end if;
-    
-        DBMS_OUTPUT.PUT_LINE( regSal.empNom || ', ' || regSal.Salario || ', ' || regSal.depNom);
+        last_dep := dep_nom;
     end loop;
-    DBMS_OUTPUT.PUT_LINE( 'Total departamento ' || lastDep || ': ' || totalDep );
+    DBMS_OUTPUT.PUT_LINE('TOTAL ' || last_dep || ' --- ' || total_dep);
 end;
 
 
 
-
-
+/*
 select CodDept, Empleados.Salario, sum(Salario)
 from Empleados join Departamentos using(CodDept)
 group by CodDept, Empleados.Salario
@@ -94,7 +97,7 @@ having Salario < (
 select avg(e.Salario)
 from Empleados e
 group by e.CodDept;
-
+*/
 
 
 
@@ -115,13 +118,26 @@ las ventas para cada vuelo. En el caso de devolución de un billete tan solo se 
 no el importe total del billete.
 */
 
+
 create or replace trigger TotalBill
-after insert or delete
-on table Billetes
+after insert on Billetes
+for each row
 declare
 	Dinero 	number(6,2);
 begin
-	if inserting then
+    -- seleccionamos el precio del billete que hemos insertado
+    select Vuelo.Importe into Dinero
+    from Vuelo 
+    where Vuelo.Numero = :new.Numero and Vuelo.Fecha like :new.Fecha;
+    
+    -- insertamos al informacion en la tabla de ventas
+    insert into Ventas(Numero, Fecha, Importe, Vendidos)
+    values(:new.Numero, :new.Fecha, Dinero, 1);
+	
+    /*if inserting then
+    DBMS_OUTPUT.PUT_LINE('inserting');
+        insert into Ventas(Numero, Fecha, Importe, Vendidos)
+        values('vvvvva', '15/02/2019', 50, 1);
 		Dinero := (
 			select Importe 
 			from Vuelo natural join Billetes 
@@ -131,12 +147,15 @@ begin
 		where :new.Numero = Ventas.Numero and :new.Fecha like Ventas.Fecha;
 	end if;
 	if deleting then
+        DBMS_OUTPUT.PUT_LINE('deleting');
 		update Ventas
 		set Ventas.Importe -= 150, Ventas.Vendidos -= 1
 		where :new.Numero = Ventas.Numero and :new.Fecha like Ventas.Fecha;
-	end if;
+	end if;*/
 end;
 
+
+select * from Ventas;
 
 -- EJERCICIO 3
 

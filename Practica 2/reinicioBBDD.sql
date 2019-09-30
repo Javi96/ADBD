@@ -46,6 +46,7 @@ Create table Aeropuerto(
 	Nombre VARCHAR(30) NOT NULL,
 	Pais VARCHAR(30)NOT NULL);
 
+
 Create table Vuelo(
 	Numero CHAR(6),
 	Fecha DATE,
@@ -58,6 +59,7 @@ Create table Vuelo(
 	unique (fecha, origen, destino),
 	check(origen<>destino));
 
+
 Create table Billetes(
 	Numero CHAR(6),
 	Fecha DATE NOT NULL,
@@ -65,6 +67,8 @@ Create table Billetes(
 
 	PRIMARY KEY(Numero, fecha, pasaporte),
 	FOREIGN KEY(Numero, fecha) REFERENCES vuelo);
+
+
 
 Create table Ventas(
 	Numero CHAR(6),
@@ -76,6 +80,23 @@ Create table Ventas(
 	foreign key (Numero, Fecha) REFERENCES Vuelo);
 
 
+insert into Aeropuerto values('aaaaaa', 'Moncloa', 'Espania');
+insert into Aeropuerto values('aaaaae', 'Goya', 'Paris');
+insert into Aeropuerto values('aaaaai', 'Metropolitano', 'Londres');
+insert into Aeropuerto values('aaaaao', 'CIU', 'Espania');
+insert into Aeropuerto values('aaaaau', 'Carpetana', 'Chicago');
+insert into Vuelo values('vvvvva', '15/02/2019', 'aaaaaa', 'aaaaae', 285.25, 50);
+insert into Vuelo values('vvvvve', '16/02/2019', 'aaaaae', 'aaaaaa', 35.47, 50);
+insert into Vuelo values('vvvvvi', '17/02/2019', 'aaaaaa', 'aaaaai', 415.36, 50);
+insert into Vuelo values('vvvvvo', '18/02/2019', 'aaaaao', 'aaaaau', 256.69, 50);
+insert into Vuelo values('vvvvvu', '19/02/2019', 'aaaaau', 'aaaaai', 369.58, 50);
+commit;
+insert into Billetes values('vvvvvi', '17/02/2019', '123456789C');
+insert into Billetes values('vvvvva', '15/02/2019', '123456789A');
+
+insert into Billetes values('vvvvve', '16/02/2019', '123456789C');
+
+commit;
 -------------------------------------- punto 3 --------------------------------------				--
 
 drop table ComisionCC;
