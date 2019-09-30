@@ -22,10 +22,11 @@ begin
 end;
 
 -- pruebas a)
+/*
 update Empleados
 set Salario = 3000
 where DNI in ('12345679B', '12345679C');
-select * from Cambios;
+select * from Cambios; -- */
 
 -- Apartado b)
 /*
@@ -34,19 +35,45 @@ salario de cada empleado cuyo salario sea inferior a la media del departamento.
 Incluir el total de dichos salarios por departamento.
 */
 
-create or replace procedure eje1_apab
-    ( nombre OUT varchar ,
-    	salario OUT number)
+create or replace procedure listaEmpDepart 
 is
-begin
-    select distinct Nombre, Salario, sum(Salario)
-    from Empleados join Departamentos using (CodDept)
-    group by CodDept
-    having Salario < (
+-- declare
+Cursor CursorSalarios IS 
+    Select Empleados.Nombre as empNom, Salario, Departamentos.Nombre as depNom
+    from Empleados join Departamentos on Empleados.CodDept = Departamentos.CodDept
+    -- group by CodDept, 
+    where Salario < (
     	select avg(Salario)
-    	from Departamentos
-    	group by CodDept
-    	);
+    	from Empleados 
+        where CodDept = Departamentos.CodDept
+    	-- group by CodDept
+    	)
+    order by Departamentos.Nombre;
+    
+    totalDep Empleados.Salario%type := 0;
+    lastDep Departamentos.Nombre%type := '';
+
+begin
+
+    DBMS_OUTPUT.PUT_LINE ('Emp, Sal, Dept');
+    for regSal in CursorSalarios loop
+         DBMS_OUTPUT.PUT_LINE (lastDep);
+        if lastDep = '' then
+            totalDep := 0;
+            lastDep := regSal.depNom;
+        end if;
+    
+        if lastDep = regSal.depNom then
+            totalDep := totalDep + regSal.Salario;
+        else
+            DBMS_OUTPUT.PUT_LINE ( 'Total ' || lastDep || ': ' || totalDep );
+            totalDep := regSal.Salario;
+            lastDep := regSal.depNom;
+        end if;
+    
+        DBMS_OUTPUT.PUT_LINE( regSal.empNom || ', ' || regSal.Salario || ', ' || regSal.depNom);
+    end loop;
+    DBMS_OUTPUT.PUT_LINE( 'Total departamento ' || lastDep || ': ' || totalDep );
 end;
 
 

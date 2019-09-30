@@ -1,22 +1,27 @@
 -------------------------------------- punto 1 --------------------------------------				--
 drop table Empleados cascade constraints;
+drop table Departamentos cascade constraints;
+drop table Cambios cascade constraints;
+
+CREATE TABLE Departamentos(
+	CodDept CHAR(5) PRIMARY KEY, 
+	Nombre VARCHAR(100));
+
 CREATE TABLE Empleados( 
 	DNI CHAR(9) PRIMARY KEY, 
 	Nombre VARCHAR(100),
 	CodDept CHAR(5) REFERENCES Departamentos on delete set NULL,
 	Salario NUMBER(4,0));
 
-drop table Departamentos cascade constraints;
-CREATE TABLE Departamentos(
-	CodDept CHAR(5) PRIMARY KEY, 
-	Nombre VARCHAR(100));
-
-drop table Cambios cascade constraints;
 CREATE TABLE Cambios(
 	IdCambio VARCHAR(10) PRIMARY KEY, 
 	Usuario VARCHAR(12), 
 	SalarioAnt NUMBER(4,0),
 	SalarioNew NUMBER(4,0));
+    
+insert into Departamentos values('11111', 'Departamento1');
+insert into Departamentos values('22222', 'Departamento2');
+insert into Departamentos values('33333', 'Departamento3');
         
 insert into Empleados values('12345679A', 'Lucas', '11111', 1300);
 insert into Empleados values('12345679B', 'Juan', '22222', 1500);
@@ -27,16 +32,14 @@ insert into Empleados values('12345679F', 'Sara', '33333', 1200);
 insert into Empleados values('12345679G', 'Sonia', '33333', 1300);
 insert into Empleados values('12345679H', 'Pablo', '11111', 1000);
 
-
-
-insert into Departamentos values('11111', 'Departamento1');
-insert into Departamentos values('22222', 'Departamento2');
-insert into Departamentos values('33333', 'Departamento3');
-
-
-
 commit;
--------------------------------------- punto 2 --------------------------------------				--
+
+
+-------------------------------------- punto 2 --------------------------------------
+drop table Billetes cascade constraints;
+drop table Ventas cascade constraints;
+drop table Vuelo cascade constraints;
+drop table Aeropuerto cascade constraints;
 
 Create table Aeropuerto(
 	Codigo CHAR(6) PRIMARY KEY,
@@ -106,8 +109,8 @@ insert into Marcas values (1, to_date('03/02/2013'),3.5);
 
 -------------------------------------- punto 5 --------------------------------------				--
 
-drop table Libros cascade constraints;
 drop table Ejemplares cascade constraints;
+drop table Libros cascade constraints;
 
 create table Libros(
 	isbn char(13) primary key,
@@ -117,5 +120,4 @@ create table Ejemplares(
 	signatura char(5) primary key,
 	isbn char(13) not null,
 	
-	FOREIGN KEY (isbn)
-	REFERENCES Libros);
+	FOREIGN KEY (isbn) REFERENCES Libros);
