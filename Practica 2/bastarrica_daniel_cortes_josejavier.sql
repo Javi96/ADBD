@@ -2,9 +2,9 @@
 
 -- Apartado a)
 /*
-Implementar un trigger que registre en la tabla Cambios cualquier modificación 
+Implementar un trigger que registre en la tabla Cambios cualquier modificaciÃ³n 
 que se produzca en el salario de un empleado, indicando el usuario en la que 
-se realizó. El identificador se obtendrá de una secuencia denominada SEQCambios que debes crear.
+se realizÃ³. El identificador se obtendrÃ¡ de una secuencia denominada SEQCambios que debes crear.
 */
 
 create sequence SEQCambios
@@ -106,9 +106,9 @@ group by e.CodDept;
 ----------------------------------------------------- EJERCICIO 2 -----------------------------------------------------
 -- Apartado a)
 /*
-Escribir un procedimiento almacenado que reciba como argumentos una fecha, los códigos de un aeropuerto de origen 
+Escribir un procedimiento almacenado que reciba como argumentos una fecha, los cÃ³digos de un aeropuerto de origen 
 y uno de destino y un pasaporte y registre un billete en el primer vuelo en el que haya plazas libres. En caso de
- que no haya vuelos disponibles se informará mediante un mensaje.
+ que no haya vuelos disponibles se informarÃ¡ mediante un mensaje.
 */
 
 create or replace NONEDITIONABLE procedure RegistraBillete
@@ -148,8 +148,8 @@ end;
 
 -- Apartado b)
 /*
-Implementar un trigger que registre en la tabla Ventas el número total de billetes vendidos y el importe total de 
-las ventas para cada vuelo. En el caso de devolución de un billete tan solo se reintegrará un importe fijo de 150€, 
+Implementar un trigger que registre en la tabla Ventas el nÃºmero total de billetes vendidos y el importe total de 
+las ventas para cada vuelo. En el caso de devoluciÃ³n de un billete tan solo se reintegrarÃ¡ un importe fijo de 150â‚¬, 
 no el importe total del billete.
 */
 
@@ -197,11 +197,33 @@ select * from Ventas;
 select * from Billetes;
 
 -- EJERCICIO 3
+/*
+Diseñar un trigger asociado a la operación delete de la tabla ComisionCC, de modo que si
+la cuenta del registro que se borre se encuentra en la tabla deposito indique en log un
+mensaje que indique la cc, el importe y el texto “Deposito asociado”. En caso contrario el
+texto indicará “Cliente preferente”
+*/
+
+create or replace trigger LogComisiones
+after delete on ComisionCC
+for each row
+declare
+    cuenta char(20);
+begin
+    select cc into cuenta
+        from deposito
+        where cc = :old.cc;
+    insert into log(msg)
+        values( :old.cc || ', ' || :old.importe || '. Deposito asociado' );
+exception
+    when no_data_found then
+        insert into log(msg) values( 'Cliente preferente' );
+end;
 
 
 -- EJERCICIO 4
 /*
-Dise�ar un trigger asociado a la operaci�n de inserci�n de la tabla Marcas, de modo que 
+Diseñar un trigger asociado a la operación de inserción de la tabla Marcas, de modo que 
 si el tiempo de la prueba que se inserte es un nuevo record se actualice el registro 
 correspondiente en la tabla Records.
 */
@@ -222,7 +244,7 @@ begin
         insert into Records(prueba, tiempo)
         values(:new.prueba, :new.tiempo);
     end if;
-    if id_record != 0 then -- ya hab�a un record, se mira si se ha establecido uno nuevo
+    if id_record != 0 then -- ya había un record, se mira si se ha establecido uno nuevo
         select Records.tiempo into record_value
         from Records
         where Records.prueba = id_record;
