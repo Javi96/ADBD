@@ -127,6 +127,7 @@ create table Marcas(prueba number, fecha date, tiempo number, primary key (prueb
 
 delete from Records;
 insert into Marcas values (1, to_date('01/02/2013'),3.8);
+commit;
 insert into Marcas values (1, to_date('02/02/2013'),4.2);
 insert into Marcas values (1, to_date('03/02/2013'),3.5);
 

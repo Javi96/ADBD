@@ -200,6 +200,39 @@ select * from Billetes;
 
 
 -- EJERCICIO 4
+/*
+Diseñar un trigger asociado a la operación de inserción de la tabla Marcas, de modo que 
+si el tiempo de la prueba que se inserte es un nuevo record se actualice el registro 
+correspondiente en la tabla Records.
+*/
 
 
+create or replace trigger NewRecord
+after insert on Marcas
+for each row
+declare
+    id_record number := 0;
+    record_value number;
+begin
+    select Records.prueba into id_record
+    from Records join Marcas on Records.prueba = Marcas.prueba
+    where Records.prueba = :new.prueba;
+    
+    if id_record = null then -- no hay record para la prueba, se inserta
+        insert into Records(prueba, tiempo)
+        values(:new.prueba, :new.tiempo);
+    end if;
+    if id_record != 0 then -- ya había un record, se mira si se ha establecido uno nuevo
+        select Records.tiempo into record_value
+        from Records
+        where Records.prueba = id_record;
+        if record_value < :new.tiempo then -- nuevo records, se actualiza registro
+            update Records
+            set tiempo = :new.tiempo
+            where prueba = id_record;
+        end if;
+    end if;
+end;
+
+select * from Records;
 -- EJERCICIO 5
