@@ -111,6 +111,39 @@ y uno de destino y un pasaporte y registre un billete en el primer vuelo en el q
  que no haya vuelos disponibles se informará mediante un mensaje.
 */
 
+select * 
+from Vuelo natural join Ventas 
+where Ventas.Vendidos < Vuelo.Plazas ;
+
+select * from Billetes;
+create or replace NONEDITIONABLE procedure RegistraBillete
+    (fecha in Vuelo.Fecha%type,
+    cod_origen in Vuelo.Origen%type,
+    cod_destino in Vuelo.Destino%type,
+    pasaporte in Billetes.Pasaporte%type)
+is
+    Cursor Vuelos is
+        select Vuelo.Numero as v_num
+        from Vuelo join Ventas
+        where Ventas.Vendidos < Vuelo.Plazas and
+            rownum = 1 and 
+            Vuelo.Fecha like fecha and 
+            Vuelo.Origen like cod_origen and 
+            Vuelo.Destino like cod_destino;
+
+    v_numero Vuelo.Numero%type;
+    
+    empty_cursor Boolean := false;
+    
+begin
+    for p_vuelo in Vuelos loop
+        v_numero := p_vuelo.v_num;
+        
+        DBMS_OUTPUT.PUT_LINE('info: ' || v_numero || ' --- ');
+        empty_cursor := true;
+    end loop;
+end;
+
 -- Apartado b)
 /*
 Implementar un trigger que registre en la tabla Ventas el número total de billetes vendidos y el importe total de 
@@ -120,42 +153,46 @@ no el importe total del billete.
 
 
 create or replace trigger TotalBill
-after insert on Billetes
+after insert or delete on Billetes
 for each row
 declare
 	Dinero 	number(6,2);
+    check_value number(1,0);
 begin
-    -- seleccionamos el precio del billete que hemos insertado
-    select Vuelo.Importe into Dinero
-    from Vuelo 
-    where Vuelo.Numero = :new.Numero and Vuelo.Fecha like :new.Fecha;
-    
-    -- insertamos al informacion en la tabla de ventas
-    insert into Ventas(Numero, Fecha, Importe, Vendidos)
-    values(:new.Numero, :new.Fecha, Dinero, 1);
-	
-    /*if inserting then
-    DBMS_OUTPUT.PUT_LINE('inserting');
-        insert into Ventas(Numero, Fecha, Importe, Vendidos)
-        values('vvvvva', '15/02/2019', 50, 1);
-		Dinero := (
-			select Importe 
-			from Vuelo natural join Billetes 
-			where Numero = :new.Numero and Fecha like :new.Fecha)
-		update Ventas
-		set Ventas.Importe += Dinero, Ventas.Vendidos += 1
-		where :new.Numero = Ventas.Numero and :new.Fecha like Ventas.Fecha;
+    -- se ingresa un nuevo billete
+    if inserting then
+        -- seleccionamos el precio del billete que ha sido insertado
+        select Vuelo.Importe into Dinero
+        from Vuelo 
+        where Vuelo.Numero = :new.Numero and Vuelo.Fecha like :new.Fecha;
+        
+        -- miramos si ese vuelo ya tenia billetes registrados
+        select count(*) into check_value
+        from Ventas
+        where Ventas.Numero = :new.Numero and Ventas.Fecha like :new.Fecha;
+        
+        if check_value = 0 then -- no estaba insertado en la tabla
+            -- insertamos al informacion en la tabla de ventas
+            insert into Ventas(Numero, Fecha, Importe, Vendidos)
+            values(:new.Numero, :new.Fecha, Dinero, 1);
+        else
+            -- actualizamos el registro con el incremento de import y una venta mas
+            update Ventas
+            set Importe = Importe + Dinero, Vendidos = Vendidos + 1
+            where Ventas.Numero = :new.Numero and Ventas.Fecha = :new.Fecha;
+        end if;    
 	end if;
-	if deleting then
-        DBMS_OUTPUT.PUT_LINE('deleting');
-		update Ventas
-		set Ventas.Importe -= 150, Ventas.Vendidos -= 1
-		where :new.Numero = Ventas.Numero and :new.Fecha like Ventas.Fecha;
-	end if;*/
+    -- se borra un billete
+    if deleting then
+        update Ventas
+        set Importe = Importe - 150, Vendidos = Vendidos - 1
+        where Ventas.Numero = :old.Numero and Ventas.Fecha = :old.Fecha;
+    end if;
 end;
 
 
 select * from Ventas;
+select * from Billetes;
 
 -- EJERCICIO 3
 

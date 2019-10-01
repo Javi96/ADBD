@@ -91,9 +91,12 @@ insert into Vuelo values('vvvvvi', '17/02/2019', 'aaaaaa', 'aaaaai', 415.36, 50)
 insert into Vuelo values('vvvvvo', '18/02/2019', 'aaaaao', 'aaaaau', 256.69, 50);
 insert into Vuelo values('vvvvvu', '19/02/2019', 'aaaaau', 'aaaaai', 369.58, 50);
 commit;
+
 insert into Billetes values('vvvvvi', '17/02/2019', '123456789C');
 insert into Billetes values('vvvvva', '15/02/2019', '123456789A');
-
+insert into Billetes values('vvvvva', '15/02/2019', '123456789C');
+delete from Billetes where Numero = 'vvvvva'and Fecha = '15/02/2019' and Pasaporte = '123456789C';
+delete from Billetes where Numero = 'vvvvva'and Fecha = '15/02/2019' and Pasaporte = '123456789A';
 insert into Billetes values('vvvvve', '16/02/2019', '123456789C');
 
 commit;
