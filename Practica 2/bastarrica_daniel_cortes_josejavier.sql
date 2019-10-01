@@ -257,4 +257,31 @@ begin
 end;
 
 select * from Records;
+
+
 -- EJERCICIO 5
+/*
+Escribir un trigger asociado a la inserción de filas en Ejemplares, de forma que si el isbn no
+aparece en Libros, se cree una fila en Libros con dicho isbn y copias con valor 1, de forma
+que se evite el error por la violación de la foreign key. En caso de existir, el número de
+ejemplares se incrementará en uno. Prueba insertando Ejemplares que satisfagan ambas
+condiciones.
+*/
+
+create or replace trigger LogComisiones
+before insert on Ejemplares
+for each row
+declare
+    libro char(13);
+begin
+    select isbn into libro
+        from Libros
+        where isbn = :new.isbn;
+    update Libros
+        set copias = copias + 1
+	where isbn = :new.isbn;
+exception
+    when no_data_found then
+        insert into Libros(isbn, copias)
+        values(:new.isbn, 1);
+end;
