@@ -111,37 +111,39 @@ y uno de destino y un pasaporte y registre un billete en el primer vuelo en el q
  que no haya vuelos disponibles se informará mediante un mensaje.
 */
 
-select * 
-from Vuelo natural join Ventas 
-where Ventas.Vendidos < Vuelo.Plazas ;
-
-select * from Billetes;
 create or replace NONEDITIONABLE procedure RegistraBillete
-    (fecha in Vuelo.Fecha%type,
-    cod_origen in Vuelo.Origen%type,
-    cod_destino in Vuelo.Destino%type,
-    pasaporte in Billetes.Pasaporte%type)
+    (in_fecha in Vuelo.Fecha%type,
+    in_cod_origen in Vuelo.Origen%type,
+    in_cod_destino in Vuelo.Destino%type,
+    in_pasaporte in Billetes.Pasaporte%type)
 is
     Cursor Vuelos is
-        select Vuelo.Numero as v_num
-        from Vuelo join Ventas
+        select Vuelo.Numero as vuelo_num 
+        from Vuelo join Ventas on Vuelo.Numero = Ventas.Numero and Vuelo.Fecha = Ventas.Fecha
         where Ventas.Vendidos < Vuelo.Plazas and
             rownum = 1 and 
-            Vuelo.Fecha like fecha and 
-            Vuelo.Origen like cod_origen and 
-            Vuelo.Destino like cod_destino;
+            Vuelo.Fecha like in_fecha and 
+            Vuelo.Origen like in_cod_origen and 
+            Vuelo.Destino like in_cod_destino;
 
     v_numero Vuelo.Numero%type;
-    
+
     empty_cursor Boolean := false;
-    
+
 begin
+    DBMS_OUTPUT.PUT_LINE('hola ');
     for p_vuelo in Vuelos loop
-        v_numero := p_vuelo.v_num;
-        
-        DBMS_OUTPUT.PUT_LINE('info: ' || v_numero || ' --- ');
+        v_numero := p_vuelo.vuelo_num;
+        insert into Billetes 
+        values(v_numero, in_fecha, in_pasaporte); 
+        commit;
+        DBMS_OUTPUT.PUT_LINE('info: ' || v_numero || ' --- ' || in_fecha || ' --- ' || in_pasaporte || ' --- ');
         empty_cursor := true;
     end loop;
+    
+    if not empty_cursor then
+        DBMS_OUTPUT.PUT_LINE('no hay billetes');
+    end if;
 end;
 
 -- Apartado b)
