@@ -93,13 +93,23 @@ insert into Vuelo values('vvvvvu', '19/02/2019', 'aaaaau', 'aaaaai', 369.58, 50)
 commit;
 
 insert into Billetes values('vvvvvi', '17/02/2019', '123456789C');
-insert into Billetes values('vvvvva', '15/02/2019', '123456789A');
-insert into Billetes values('vvvvva', '15/02/2019', '123456789C');
-delete from Billetes where Numero = 'vvvvva'and Fecha = '15/02/2019' and Pasaporte = '123456789C';
-delete from Billetes where Numero = 'vvvvva'and Fecha = '15/02/2019' and Pasaporte = '123456789A';
-insert into Billetes values('vvvvve', '16/02/2019', '123456789C');
-
 commit;
+insert into Billetes values('vvvvva', '15/02/2019', '123456789A');
+commit;
+insert into Billetes values('vvvvva', '15/02/2019', '123456789C');
+commit;
+delete from Billetes where Numero = 'vvvvva'and Fecha = '15/02/2019' and Pasaporte = '123456789C';
+commit;
+delete from Billetes where Numero = 'vvvvva'and Fecha = '15/02/2019' and Pasaporte = '123456789A';
+commit;
+insert into Billetes values('vvvvve', '16/02/2019', '123456789C');
+commit;
+delete from Billetes where Numero = 'vvvvve'and Fecha = '16/02/2019' and Pasaporte = '123456789C';
+commit;
+
+insert into Vuelo values('vvvvvw', '15/02/2019', 'aaaaai', 'aaaaae', 285.25, 0);
+commit;
+
 -------------------------------------- punto 3 --------------------------------------				--
 
 drop table ComisionCC;
@@ -126,11 +136,13 @@ create table Records(prueba number primary key, tiempo number);
 create table Marcas(prueba number, fecha date, tiempo number, primary key (prueba,fecha));
 
 delete from Records;
+commit;
 insert into Marcas values (1, to_date('01/02/2013'),3.8);
 commit;
 insert into Marcas values (1, to_date('02/02/2013'),4.2);
+commit;
 insert into Marcas values (1, to_date('03/02/2013'),3.5);
-
+commit;
 
 -------------------------------------- punto 5 --------------------------------------				--
 
@@ -146,3 +158,7 @@ create table Ejemplares(
 	isbn char(13) not null,
 	
 	FOREIGN KEY (isbn) REFERENCES Libros);
+    
+    
+insert into Ejemplares values('ASDFD', 'ZZZXXXCCCVVVB');
+commit;

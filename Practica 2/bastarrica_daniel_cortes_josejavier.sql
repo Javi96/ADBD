@@ -1,108 +1,3 @@
--- EJERCICIO 1
-
--- Apartado a)
-/*
-Implementar un trigger que registre en la tabla Cambios cualquier modificaciÃ³n 
-que se produzca en el salario de un empleado, indicando el usuario en la que 
-se realizÃ³. El identificador se obtendrÃ¡ de una secuencia denominada SEQCambios que debes crear.
-*/
-
-create sequence SEQCambios
-start with 1
-order;
-
-create or replace trigger ModifSal
-after update on Empleados
-for each row
-begin
-    if :old.Salario != :new.Salario then
-        insert into Cambios(IdCambio, Usuario, SalarioAnt, SalarioNew)
-        values(SEQCambios.nextval, :old.DNI, :old.Salario, :new.Salario);
-    end if;
-end;
-
--- pruebas a)
-/*
-update Empleados
-set Salario = 3000
-where DNI in ('12345679B', '12345679C');
-select * from Cambios; -- */
-
--- Apartado b)
-/*
-Escribir un procedimiento almacenado que liste por departamento el nombre y 
-salario de cada empleado cuyo salario sea inferior a la media del departamento. 
-Incluir el total de dichos salarios por departamento.
-*/
-
-create or replace NONEDITIONABLE procedure listaEmpDepart 
-is
-Cursor CursorSalarios IS 
-    Select Empleados.Nombre as empNom, Salario, Departamentos.Nombre as depNom
-    from Empleados join Departamentos on Empleados.CodDept = Departamentos.CodDept
-    -- group by CodDept, 
-    where Salario < (
-    	select avg(Salario)
-    	from Empleados 
-        where CodDept = Departamentos.CodDept
-    	-- group by CodDept
-    	)
-    order by Departamentos.Nombre;
-
-    totalDep Empleados.Salario%type := 0;
-    lastDep Departamentos.Nombre%type := '';
-    
-    emp_nom Empleados.Nombre%type := '';
-    dep_nom Departamentos.Nombre%type := '';
-    emp_sal Empleados.Salario%type := 0;
-    
-    total_dep Empleados.Salario%type := 0;
-    last_dep Departamentos.Nombre%type;
-
-begin
-    
-    for pointer in CursorSalarios loop
-        emp_nom := pointer.empNom;
-        dep_nom := pointer.depNom;
-        emp_sal := pointer.Salario;
-        
-        if last_dep is null or last_dep = dep_nom then -- son del mismo departamento o es el primero de todos -> se acumula
-            DBMS_OUTPUT.PUT_LINE(emp_nom || ' --- ' || dep_nom || ' --- ' || emp_sal);
-            total_dep := total_dep + emp_sal;
-        else
-            DBMS_OUTPUT.PUT_LINE('TOTAL ' || last_dep || ' --- ' || total_dep);
-            DBMS_OUTPUT.PUT_LINE(emp_nom || ' --- ' || dep_nom || ' --- ' || emp_sal);
-            total_dep := emp_sal;
-        
-        end if;
-        last_dep := dep_nom;
-    end loop;
-    DBMS_OUTPUT.PUT_LINE('TOTAL ' || last_dep || ' --- ' || total_dep);
-end;
-
-
-
-/*
-select CodDept, Empleados.Salario, sum(Salario)
-from Empleados join Departamentos using(CodDept)
-group by CodDept, Empleados.Salario
-having Salario < (
-    select avg(e.Salario)
-    from Empleados e
-    where 11111 like e.CodDept
-    group by e.CodDept
-    );
-
-
-select avg(e.Salario)
-from Empleados e
-group by e.CodDept;
-*/
-
-
-
-
-
 ----------------------------------------------------- EJERCICIO 2 -----------------------------------------------------
 -- Apartado a)
 /*
@@ -111,7 +6,7 @@ y uno de destino y un pasaporte y registre un billete en el primer vuelo en el q
  que no haya vuelos disponibles se informarÃ¡ mediante un mensaje.
 */
 
-create or replace NONEDITIONABLE procedure RegistraBillete
+create or replace procedure RegistraBillete
     (in_fecha in Vuelo.Fecha%type,
     in_cod_origen in Vuelo.Origen%type,
     in_cod_destino in Vuelo.Destino%type,
@@ -119,31 +14,24 @@ create or replace NONEDITIONABLE procedure RegistraBillete
 is
     Cursor Vuelos is
         select Vuelo.Numero as vuelo_num 
-        from Vuelo join Ventas on Vuelo.Numero = Ventas.Numero and Vuelo.Fecha = Ventas.Fecha
-        where Ventas.Vendidos < Vuelo.Plazas and
-            rownum = 1 and 
+        from Vuelo left join Ventas on Vuelo.Numero = Ventas.Numero and Vuelo.Fecha = Ventas.Fecha
+        where coalesce( Ventas.Vendidos, 0) < Vuelo.Plazas and
             Vuelo.Fecha like in_fecha and 
             Vuelo.Origen like in_cod_origen and 
             Vuelo.Destino like in_cod_destino;
 
     v_numero Vuelo.Numero%type;
 
-    empty_cursor Boolean := false;
-
-begin
-    DBMS_OUTPUT.PUT_LINE('hola ');
-    for p_vuelo in Vuelos loop
-        v_numero := p_vuelo.vuelo_num;
+begin    
+    open Vuelos;
+    fetch Vuelos into v_numero;
+    if Vuelos%FOUND then
         insert into Billetes 
         values(v_numero, in_fecha, in_pasaporte); 
-        commit;
-        DBMS_OUTPUT.PUT_LINE('info: ' || v_numero || ' --- ' || in_fecha || ' --- ' || in_pasaporte || ' --- ');
-        empty_cursor := true;
-    end loop;
-    
-    if not empty_cursor then
+    else
         DBMS_OUTPUT.PUT_LINE('no hay billetes');
     end if;
+    close Vuelos;
 end;
 
 -- Apartado b)
@@ -159,7 +47,7 @@ after insert or delete on Billetes
 for each row
 declare
 	Dinero 	number(6,2);
-    check_value number(1,0);
+    check_value CHAR(6);
 begin
     -- se ingresa un nuevo billete
     if inserting then
@@ -169,57 +57,26 @@ begin
         where Vuelo.Numero = :new.Numero and Vuelo.Fecha like :new.Fecha;
         
         -- miramos si ese vuelo ya tenia billetes registrados
-        select count(*) into check_value
+        select Numero into check_value
         from Ventas
         where Ventas.Numero = :new.Numero and Ventas.Fecha like :new.Fecha;
         
-        if check_value = 0 then -- no estaba insertado en la tabla
-            -- insertamos al informacion en la tabla de ventas
-            insert into Ventas(Numero, Fecha, Importe, Vendidos)
-            values(:new.Numero, :new.Fecha, Dinero, 1);
-        else
-            -- actualizamos el registro con el incremento de import y una venta mas
-            update Ventas
-            set Importe = Importe + Dinero, Vendidos = Vendidos + 1
-            where Ventas.Numero = :new.Numero and Ventas.Fecha = :new.Fecha;
-        end if;    
-	end if;
+        -- actualizamos el registro con el incremento de import y una venta mas
+        update Ventas
+        set Importe = Importe + Dinero, Vendidos = Vendidos + 1
+        where Ventas.Numero = :new.Numero and Ventas.Fecha = :new.Fecha;
+    end if;
     -- se borra un billete
     if deleting then
         update Ventas
         set Importe = Importe - 150, Vendidos = Vendidos - 1
         where Ventas.Numero = :old.Numero and Ventas.Fecha = :old.Fecha;
     end if;
-end;
-
-
-select * from Ventas;
-select * from Billetes;
-
--- EJERCICIO 3
-/*
-Diseñar un trigger asociado a la operación delete de la tabla ComisionCC, de modo que si
-la cuenta del registro que se borre se encuentra en la tabla deposito indique en log un
-mensaje que indique la cc, el importe y el texto “Deposito asociado”. En caso contrario el
-texto indicará “Cliente preferente”
-*/
-
-create or replace trigger LogComisiones
-after delete on ComisionCC
-for each row
-declare
-    cuenta char(20);
-begin
-    select cc into cuenta
-        from deposito
-        where cc = :old.cc;
-    insert into log(msg)
-        values( :old.cc || ', ' || :old.importe || '. Deposito asociado' );
 exception
     when no_data_found then
-        insert into log(msg) values( 'Cliente preferente' );
+        insert into Ventas(Numero, Fecha, Importe, Vendidos)
+        values(:new.Numero, :new.Fecha, Dinero, 1);
 end;
-
 
 -- EJERCICIO 4
 /*
@@ -233,55 +90,21 @@ create or replace trigger NewRecord
 after insert on Marcas
 for each row
 declare
-    id_record number := 0;
+    id_record number;
     record_value number;
 begin
-    select Records.prueba into id_record
-    from Records join Marcas on Records.prueba = Marcas.prueba
-    where Records.prueba = :new.prueba;
+    select prueba, tiempo into id_record, record_value
+    from Records 
+    where prueba = :new.prueba;
     
-    if id_record = null then -- no hay record para la prueba, se inserta
-        insert into Records(prueba, tiempo)
-        values(:new.prueba, :new.tiempo);
+    if record_value < :new.tiempo then -- nuevo records, se actualiza registro
+        update Records
+        set tiempo = :new.tiempo
+        where prueba = id_record;
     end if;
-    if id_record != 0 then -- ya había un record, se mira si se ha establecido uno nuevo
-        select Records.tiempo into record_value
-        from Records
-        where Records.prueba = id_record;
-        if record_value < :new.tiempo then -- nuevo records, se actualiza registro
-            update Records
-            set tiempo = :new.tiempo
-            where prueba = id_record;
-        end if;
-    end if;
-end;
-
-select * from Records;
-
-
--- EJERCICIO 5
-/*
-Escribir un trigger asociado a la inserción de filas en Ejemplares, de forma que si el isbn no
-aparece en Libros, se cree una fila en Libros con dicho isbn y copias con valor 1, de forma
-que se evite el error por la violación de la foreign key. En caso de existir, el número de
-ejemplares se incrementará en uno. Prueba insertando Ejemplares que satisfagan ambas
-condiciones.
-*/
-
-create or replace trigger LogComisiones
-before insert on Ejemplares
-for each row
-declare
-    libro char(13);
-begin
-    select isbn into libro
-        from Libros
-        where isbn = :new.isbn;
-    update Libros
-        set copias = copias + 1
-	where isbn = :new.isbn;
+    
 exception
     when no_data_found then
-        insert into Libros(isbn, copias)
-        values(:new.isbn, 1);
+        insert into Records(prueba, tiempo)
+        values(:new.prueba, :new.tiempo);
 end;
