@@ -1,0 +1,99 @@
+oracle@ubuntu32vb:~$ source /usr/local/bin/oraenv 
+ORACLE_SID = [oracle] ? orcl
+The Oracle base for ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1 is /u01/app/oracle
+oracle@ubuntu32vb:~$ sqlplus SYS as SYSDBA
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Oct 7 16:12:31 2019
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Enter password: 
+Connected to an idle instance.
+
+SQL> STARTUP
+ORACLE instance started.
+
+Total System Global Area  636100608 bytes
+Fixed Size		    1338392 bytes
+Variable Size		  222299112 bytes
+Database Buffers	  406847488 bytes
+Redo Buffers		    5615616 bytes
+Database mounted.
+Database opened.
+SQL> quit
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+oracle@ubuntu32vb:~$ lsnrctl start
+
+LSNRCTL for Linux: Version 11.2.0.1.0 - Production on 07-OCT-2019 16:16:34
+
+Copyright (c) 1991, 2009, Oracle.  All rights reserved.
+
+Starting /u01/app/oracle/product/11.2.0/dbhome_1/bin/tnslsnr: please wait...
+
+TNSLSNR for Linux: Version 11.2.0.1.0 - Production
+System parameter file is /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora
+Log messages written to /u01/app/oracle/diag/tnslsnr/ubuntu32vb/listener/alert/log.xml
+Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))
+Listening on: (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=ubuntu32vb)(PORT=1521)))
+
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))
+STATUS of the LISTENER
+------------------------
+Alias                     LISTENER
+Version                   TNSLSNR for Linux: Version 11.2.0.1.0 - Production
+Start Date                07-OCT-2019 16:16:34
+Uptime                    0 days 0 hr. 0 min. 0 sec
+Trace Level               off
+Security                  ON: Local OS Authentication
+SNMP                      OFF
+Listener Parameter File   /u01/app/oracle/product/11.2.0/dbhome_1/network/admin/listener.ora
+Listener Log File         /u01/app/oracle/diag/tnslsnr/ubuntu32vb/listener/alert/log.xml
+Listening Endpoints Summary...
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=EXTPROC1521)))
+  (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=ubuntu32vb)(PORT=1521)))
+The listener supports no services
+The command completed successfully
+oracle@ubuntu32vb:~$ emctl start dbconsole
+Oracle Enterprise Manager 11g Database Control Release 11.2.0.1.0 
+Copyright (c) 1996, 2009 Oracle Corporation.  All rights reserved.
+https://ubuntu32vb:1158/em/console/aboutApplication
+Starting Oracle Enterprise Manager 11g Database Control ........... started. 
+------------------------------------------------------------------
+Logs are generated in directory /u01/app/oracle/product/11.2.0/dbhome_1/ubuntu32vb_orcl/sysman/log 
+oracle@ubuntu32vb:~$ emctl stop dbconsole
+Oracle Enterprise Manager 11g Database Control Release 11.2.0.1.0 
+Copyright (c) 1996, 2009 Oracle Corporation.  All rights reserved.
+https://ubuntu32vb:1158/em/console/aboutApplication
+Stopping Oracle Enterprise Manager 11g Database Control ... 
+ ...  Stopped. 
+oracle@ubuntu32vb:~$ lsnrctl stop
+
+LSNRCTL for Linux: Version 11.2.0.1.0 - Production on 07-OCT-2019 16:33:46
+
+Copyright (c) 1991, 2009, Oracle.  All rights reserved.
+
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=IPC)(KEY=EXTPROC1521)))
+The command completed successfully
+oracle@ubuntu32vb:~$ sqlplus sys as sysdba
+
+SQL*Plus: Release 11.2.0.1.0 Production on Mon Oct 7 16:34:22 2019
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Enter password: 
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> shutdown inmediate
+SP2-0717: illegal SHUTDOWN option
+SQL> shutdown immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> quit
+Disconnected from Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+oracle@ubuntu32vb:~$ 
