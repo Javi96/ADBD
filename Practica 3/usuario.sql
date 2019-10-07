@@ -1,0 +1,11 @@
+DROP USER usuario1 CASCADE;
+CREATE USER usuario1 IDENTIFIED BY usuario1;
+GRANT RESOURCE TO usuario1;
+GRANT CONNECT TO usuario1;
+GRANT CREATE TRIGGER TO usuario1;
+GRANT CREATE SEQUENCE TO usuario1;
+GRANT CREATE TABLE TO usuario1;
+GRANT CREATE SYNONYM TO usuario1;
+GRANT CREATE VIEW TO usuario1;
+GRANT CREATE PROCEDURE TO usuario1;
+GRANT debug any procedure, debug connect session TO usuario1;
