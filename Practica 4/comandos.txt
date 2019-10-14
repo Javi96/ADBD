@@ -1,0 +1,29 @@
+
+source /usr/local/bin/oraenv
+
+ORACLE_SID = [oracle] ? orcl
+
+sqlplus SYS as SYSDBA
+
+Enter password: adbd19
+
+SQL> STARTUP
+SQL> quit
+
+lsnrctl start
+
+emctl start dbconsole
+
+
+DESDE AQUI PARA PARAR LA MAQUINA
+
+emctl stop dbconsole
+
+lsnrctl stop
+
+sqlplus sys as sysdba
+
+Enter password: orcl
+
+SQL> shutdown immediate
+SQL> quit
